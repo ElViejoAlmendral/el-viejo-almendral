@@ -860,12 +860,14 @@
             💬 Consultar vía WhatsApp
         </a>
 
-        <!-- Formulario minimalista -->
+        <!-- Formulario minimalista con Web3Forms -->
         <div class="form-container">
             <h3>✦ O envíanos un mensaje ✦</h3>
             <form id="contactForm" class="elegant-form" action="https://api.web3forms.com/submit" method="POST">
-                <input type="hidden" name="_subject" value="Nuevo mensaje desde El Viejo Almendral">
-                <input type="hidden" name="_captcha" value="false">
+                <input type="hidden" name="access_key" value="TU-CLAVE-AQUI">
+                <input type="hidden" name="subject" value="Nuevo mensaje desde El Viejo Almendral">
+                <input type="hidden" name="redirect" value="https://ElViejoAlmendral.github.io/el-viejo-almendral/">
+                <input type="hidden" name="from_name" value="El Viejo Almendral">
                 <div class="form-group-modern">
                     <input type="text" name="nombre" id="nombre" placeholder=" ">
                     <label for="nombre">Tu nombre</label>
@@ -1106,13 +1108,40 @@
         });
         document.getElementById('langEsBtn').classList.add('active');
 
-        // Formularios
+        // Formulario de contacto con Web3Forms
         document.getElementById('contactForm').addEventListener('submit', function(e) {
             e.preventDefault();
-            alert(currentLang === 'es' ? '✓ Mensaje enviado con éxito' : '✓ Message sent successfully');
-            this.reset();
+            
+            const submitBtn = this.querySelector('button[type="submit"]');
+            const originalText = submitBtn.textContent;
+            submitBtn.textContent = currentLang === 'es' ? 'Enviando...' : 'Sending...';
+            submitBtn.disabled = true;
+            
+            const formData = new FormData(this);
+            
+            fetch('https://api.web3forms.com/submit', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert(currentLang === 'es' ? '✓ Mensaje enviado con éxito. Te contactaremos pronto.' : '✓ Message sent successfully. We will contact you soon.');
+                    this.reset();
+                } else {
+                    alert(currentLang === 'es' ? '✗ Error al enviar. Por favor, intenta nuevamente.' : '✗ Error sending. Please try again.');
+                }
+            })
+            .catch(error => {
+                alert(currentLang === 'es' ? '✗ Error de conexión. Por favor, intenta más tarde.' : '✗ Connection error. Please try again later.');
+            })
+            .finally(() => {
+                submitBtn.textContent = originalText;
+                submitBtn.disabled = false;
+            });
         });
 
+        // Newsletter
         document.getElementById('newsletterForm').addEventListener('submit', function(e) {
             e.preventDefault();
             alert(currentLang === 'es' ? '✓ Suscripción exitosa' : '✓ Subscription successful');
